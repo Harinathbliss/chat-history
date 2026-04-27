@@ -2,6 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
+  # 1. ల్యాంబ్డా ఫంక్షన్ డెఫినిషన్
   MyLocalFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -12,17 +13,8 @@ Resources:
       MemorySize: 256
       Timeout: 30
       CodeUri: mylambda/
-  MyChatHistoryTable:
-    Type: AWS::Serverless::SimpleTable
-    Properties:
-      PrimaryKey:
-        Name: userid
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
       
-      
+      # పర్మిషన్లు ఇక్కడ ఉండాలి (Function కింద)
       Policies:
         - Statement:
             - Effect: Allow
@@ -32,21 +24,33 @@ Resources:
               Resource: "*"
             - Effect: Allow
               Action:
+                - "dynamodb:PutItem"
+                - "dynamodb:GetItem"
+                - "dynamodb:Query"
+                - "dynamodb:UpdateItem"
+              Resource: !GetAtt MyChatHistoryTable.Arn
+            - Effect: Allow
+              Action:
                 - "logs:CreateLogGroup"
                 - "logs:CreateLogStream"
                 - "logs:PutLogEvents"
               Resource: "arn:aws:logs:*:*:*"
-            - Effect: Allow
-              Action:
-                  - "dynamodb:PutItem"
-                  - "dynamodb:GetItem"
-                  - "dynamodb:Query"
-                  - "dynamodb:UpdateItem"
-              Resource: !GetAtt MyChatHistoryTable.Arn
 
+      # ఈవెంట్స్ (API Gateway) కూడా ఇక్కడే ఉండాలి
       Events:
         MyApiEvent:
           Type: Api
           Properties:
             Path: /ask
             Method: post
+
+  # 2. డైనమోడీబీ టేబుల్ డెఫినిషన్
+  MyChatHistoryTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: userid
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
