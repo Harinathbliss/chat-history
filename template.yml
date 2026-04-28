@@ -17,7 +17,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref MyChatHistoryTable
-          SOURCE_BUCKET: !Ref MyDataBucket 
+          SOURCE_BUCKET: "harinathdocs" # మీ బకెట్ పేరు ఇక్కడ నేరుగా ఇచ్చాను
 
       Policies:
         - Statement:
@@ -33,14 +33,14 @@ Resources:
                 - "dynamodb:Query"
                 - "dynamodb:UpdateItem"
               Resource: !GetAtt MyChatHistoryTable.Arn
-            # S3 Permissions
+            # మ్యాన్యువల్ బకెట్ 'harinathdocs' నుండి డేటా చదవడానికి పర్మిషన్
             - Effect: Allow
               Action:
                 - "s3:GetObject"
                 - "s3:ListBucket"
               Resource: 
-                - !GetAtt MyDataBucket.Arn
-                - !Sub "${MyDataBucket.Arn}/*"
+                - "arn:aws:s3:::harinathdocs"
+                - "arn:aws:s3:::harinathdocs/*"
             - Effect: Allow
               Action:
                 - "logs:CreateLogGroup"
@@ -54,18 +54,17 @@ Resources:
           Properties:
             Path: /ask
             Method: post
-        # S3 Trigger అప్‌డేట్
-        S3UploadTrigger:
-          Type: S3
-          Properties:
-            Bucket: !Ref MyDataBucket
-            Events: s3:ObjectCreated:*
+        # గమనిక: ఇక్కడ నుండి S3UploadTrigger ని తీసేశాను (Circular Dependency ని నివారించడానికి)
 
-  # 2. S3 బకెట్ (పేరు 'docs' గా మార్చాను)
-  MyDataBucket:
-    Type: AWS::S3::Bucket
+  # 2. మ్యాన్యువల్ పర్మిషన్ (Handshake)
+  # ఇది S3 బకెట్ కి మీ ల్యాంబ్డాని పిలిచే అధికారాన్ని ఇస్తుంది
+  S3InvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
     Properties:
-      BucketName: harinathdocs
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref MyLocalFunction
+      Principal: s3.amazonaws.com
+      SourceArn: "arn:aws:s3:::harinathdocs"
 
   # 3. డైనమోడీబీ టేబుల్
   MyChatHistoryTable:
