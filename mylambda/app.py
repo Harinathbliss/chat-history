@@ -30,7 +30,6 @@ def lambda_handler(event,context):
      
 
      response = s3_client.get_object(Bucket=bucket,Key=key)
-     file_content = response['Body'].read().decode('utf-8')
      pdf_reader = PdfReader(io.BytesIO(response['Body'].read()))
 
      full_text = ""
