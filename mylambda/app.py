@@ -19,7 +19,7 @@ logger.setLevel('INFO')
 s3_client = boto3.client('s3')
 bedrock_client = boto3.client(service_name='bedrock-runtime')
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+
 
 
 def lambda_handler(event,context):
