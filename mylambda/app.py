@@ -59,7 +59,7 @@ def lambda_handler(event,context):
                separators=["\n\n", "\n", " ", ""]
      )
      
-     chunks = splitter.split_text(text)
+     chunks = splitter.split_text(full_text)
      proceded_data = []
      for i in range(0,len(chunks),10):
           current_batch = chunks[i : i + 10]
@@ -77,7 +77,7 @@ def lambda_handler(event,context):
           body=request
                )
           response_body = json.loads(bedrock_response.get('body').read())
-          embedding = response_body.get('embedding')
+          embedding = response_body.get('embeddings')
           for j, embedding in enumerate(embedding):
             actual_index = i + j
             proceded_data.append({
