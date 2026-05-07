@@ -2,7 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
-  # 1. ల్యాంబ్డా ఫంక్షన్ డెఫినిషన్
   MyLocalFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -17,7 +16,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref MyChatHistoryTable
-          SOURCE_BUCKET: "harinathdocs" # మీ బకెట్ పేరు ఇక్కడ నేరుగా ఇచ్చాను
+          SOURCE_BUCKET: "harinathdocs"
 
       Policies:
         - Statement:
@@ -25,9 +24,18 @@ Resources:
               Action:
                 - "bedrock:InvokeModel"
                 - "bedrock:InvokeModelWithResponseStream"
-                -  "aws-marketplace:ViewSubscriptions"
-                -  "aws-marketplace:Subscribe"
+                - "bedrock:ListFoundationModels"
+                - "bedrock:GetFoundationModel"
+              # Resource '*' బదులు బెడ్‌రాక్ మోడల్స్ ARN ఫార్మాట్ వాడటం మంచిది
+              Resource: "arn:aws:bedrock:us-east-1::foundation-model/*"
+            
+            - Effect: Allow
+              Action:
+                - "aws-marketplace:ViewSubscriptions"
+                - "aws-marketplace:Subscribe"
+                - "aws-marketplace:GetEntitlements"
               Resource: "*"
+
             - Effect: Allow
               Action:
                 - "dynamodb:PutItem"
@@ -35,7 +43,7 @@ Resources:
                 - "dynamodb:Query"
                 - "dynamodb:UpdateItem"
               Resource: !GetAtt MyChatHistoryTable.Arn
-            # మ్యాన్యువల్ బకెట్ 'harinathdocs' నుండి డేటా చదవడానికి పర్మిషన్
+
             - Effect: Allow
               Action:
                 - "s3:GetObject"
@@ -43,6 +51,7 @@ Resources:
               Resource: 
                 - "arn:aws:s3:::harinathdocs"
                 - "arn:aws:s3:::harinathdocs/*"
+
             - Effect: Allow
               Action:
                 - "logs:CreateLogGroup"
@@ -50,10 +59,6 @@ Resources:
                 - "logs:PutLogEvents"
               Resource: "arn:aws:logs:*:*:*"
 
-      
-
-  # 2. మ్యాన్యువల్ పర్మిషన్ (Handshake)
-  # ఇది S3 బకెట్ కి మీ ల్యాంబ్డాని పిలిచే అధికారాన్ని ఇస్తుంది
   S3InvokeLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -62,7 +67,6 @@ Resources:
       Principal: s3.amazonaws.com
       SourceArn: "arn:aws:s3:::harinathdocs"
 
-  # 3. డైనమోడీబీ టేబుల్
   MyChatHistoryTable:
     Type: AWS::DynamoDB::Table
     Properties:

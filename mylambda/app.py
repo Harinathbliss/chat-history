@@ -75,7 +75,7 @@ def lambda_handler(event,context):
         #   logger.info(f"Current Batch {current_batch}")
      request = json.dumps(native_request)
      bedrock_response = bedrock_client.invoke_model(
-          modelId="amazon.titan-embed-text-v2:0", 
+          modelId="cohere.embed-english-v3", 
           contentType="application/json", 
           accept="application/json", 
           body=request
