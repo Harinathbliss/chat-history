@@ -12,6 +12,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from botocore.config import Config
 
 config = Config(
+    read_timeout=120,   
+    connect_timeout=60,
     retries = {
         'max_attempts': 10,
         'mode': 'standard' # ఇది ఆటోమేటిక్ గా 'Wait and Retry' చేస్తుంది
@@ -73,7 +75,7 @@ def lambda_handler(event,context):
           logger.info(f"Current Batch {current_batch}")
           request = json.dumps(native_request)
           bedrock_response = bedrock_client.invoke_model(
-          modelId="cohere.embed-english-v3", 
+          modelId="amazon.titan-embed-text-v1", 
           contentType="application/json", 
           accept="application/json", 
           body=request
