@@ -13,7 +13,7 @@ from qdrant_client.models import Distance, VectorParams, PointStruct
 
 # AWS SDK Config: Retry mechanism for Free Tier accounts
 
-QDRANT_HOST = "54.81.245.161" 
+QDRANT_HOST = "54.157.35.63" 
 QDRANT_PORT = 6333
 
 
